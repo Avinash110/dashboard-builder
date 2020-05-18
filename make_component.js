@@ -18,7 +18,9 @@ export default class "+nameToReplace+" extends React.Component {\n\
         this.state = {};\n\
     }\n\
     render() {\n\
-        return <h2>Welcome to React App</h2>;\n\
+        return (\
+          <div />  \n\
+        );\n\
     }\n\
 }";
 
