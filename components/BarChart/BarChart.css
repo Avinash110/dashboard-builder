@@ -13,6 +13,20 @@
     cursor: se-resize;
 }
 
-.react-resizable {
+.chart-card, .react-resizable {
     position: relative;
+}
+
+.chart-card .build-icon {
+    position: absolute;
+    right: 0;
+    z-index: 1;
+}
+
+.options-modal-body {
+    background-color: white;
+}
+
+.chart-card {
+    display: inline-block;
 }

@@ -7,18 +7,13 @@ import AppDrawer from "../AppDrawer/AppDrawer.js";
 import CreateDashboard from "../CreateDashboard/CreateDashboard.js";
 import DashboardList from "../DashboardList/DashboardList.js";
 
-const MenuItemList = [
-	{name: "Create Dashboard", component: CreateDashboard},
-	{name: "Dashboards", component: DashboardList}
-];
-
-
 export default class App extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
         	openDrawer: false,
-        	selectedMenuItem: null
+        	selectedMenuItem: null,
+        	createdDashboards: []
         };
     }
 	
@@ -26,6 +21,12 @@ export default class App extends React.Component {
     	this.setState({
     		data: ["Avinash"]
     	});
+	}
+
+	onDashboardSave = (components) => {
+		this.setState({
+			createdDashboards: [...this.state.createdDashboards, components]
+		});
 	}
 
 	onDrawerToggle = () => {
@@ -41,13 +42,19 @@ export default class App extends React.Component {
 	}
 
     render() {
+		
+		const MenuItemList = [
+			{name: "Create Dashboard", component: <CreateDashboard onDashboardSave={this.onDashboardSave}/> },
+			{name: "Dashboards", component: <DashboardList createdDashboards={this.state.createdDashboards}/>}
+		];
+
 		let MenuComponent;
 		if (this.state.selectedMenuItem !== null){
 			MenuComponent = MenuItemList[this.state.selectedMenuItem].component;
 		}
 
         return (
-        	<div>
+        	<React.Fragment>
         		<NavBar
         			onDrawerToggle={this.onDrawerToggle}
 				/>
@@ -58,9 +65,9 @@ export default class App extends React.Component {
 					menuItemList={MenuItemList}
 				/>
 				{
-					MenuComponent && <MenuComponent />
+					MenuComponent
 				}
-        	</div>
+        	</React.Fragment>
         );
     }
 }

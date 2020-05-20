@@ -1,0 +1,19 @@
+.dashboard-container {
+	height: calc(100% - 98px);
+    position: relative;
+    padding: 16px;
+}
+
+.dashboard-container .dashboard-controls{
+	position: absolute;
+	bottom: 12px;
+	right: 72px;
+	width: 80px;
+	justify-content: space-between;
+	display: flex;
+}
+
+.dashboard-container .icon-button {
+	padding: 8px;
+	background-color: white;
+}
