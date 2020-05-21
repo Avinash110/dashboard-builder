@@ -20,18 +20,26 @@ import {mergeDeep, setId} from "../Utils.js";
 export default class BarChart extends React.Component {
     settingsToUpdate = setId([
         {name: "Color", type: "color", path: ["color"]},
+        {name: "Data Labels", type: "object", items: [
+            {name: "Format", type: "dropdown", path: ["labels", "format"]},
+            {name: "Show", type: "boolean", path: ["labels", "show"]}
+        ]},
         {name: "X-Axis", type: "object", items: [
-            {name: "Hide", type: "boolean", path: ["xaxis", "hide"]},
+            {name: "Title", type: "text", path: ["xaxis", "title"]},
             {name: "Color", type: "color", path: ["xaxis", "color"]}
         ]},
         {name: "Y-Axis", type: "object", items: [
-            {name: "Hide", type: "boolean", path: ["yaxis", "hide"]},
+            {name: "Title", type: "text", path: ["xaxis", "title"]},
             {name: "Color", type: "color", path: ["yaxis", "color"]}
+        ]},
+        {name: "Data", type: "object", items: [
+            {name: "Sort-By", type: "list", values: [{name: "X-Axis", value: "xaxis"}, {name: "Y-Axis", value: "yaxis"}], path: ["sort", "axis"]},
+            {name: "Sort-Func", type: "list", values: [{name: "Asc", value: "asc"}, {name: "Desc", value: "desc"}], path: ["sort", "func"]}
         ]}
     ])
     constructor(props) {
         super(props);
-        const margin = {top: 0, right: 20, bottom: 30, left: 40};
+        const margin = {top: 0, right: 48, bottom: 30, left: 40};
         this.state = {
             openSettings: false,
             componentProps: mergeDeep({
@@ -44,6 +52,12 @@ export default class BarChart extends React.Component {
                 },
                 yaxis: {
                     columnName: 'sales'
+                },
+                labels: {
+                    show: false
+                },
+                sort: {
+
                 },
                 data: [{salesperson: "Bob", sales: 33},
                     {salesperson: "Robin", sales: 12},
@@ -78,8 +92,7 @@ export default class BarChart extends React.Component {
 		this.createBarChart();
     }
 
-    createXAxis = () => {
-    	const {margin, data, xaxis} = this.state.componentProps;
+    createXAxis = (margin, data, xaxis) => {
     	const width = this.getWidth();
     	var x = d3.scaleBand()
               .range([0, width])
@@ -89,14 +102,27 @@ export default class BarChart extends React.Component {
         return x;
     }
 
-    createYAxis = () => {
-    	const { margin, data, yaxis} = this.state.componentProps;
+    createYAxis = (margin, data, yaxis) => {
     	const height = this.getHeight();
     	var y = d3.scaleLinear()
               .range([height, 0]);
 
         y.domain([0, d3.max(data, (d) => d[yaxis.columnName])]);
         return y;
+    }
+
+    createLabels = (data, x, y, height, color) => {
+        return data.map((d, index) => {
+            return <text
+                        fill={color}
+                        key={index} 
+                        className="data-label" 
+                        x={x(d.salesperson) + (x.bandwidth() / 2)}
+                        y={y(d.sales)}
+                    >
+                        {d.sales}
+                    </text>
+        });
     }
 
     createBars = (data, x, y, height, color) => {
@@ -136,15 +162,28 @@ export default class BarChart extends React.Component {
     }
 
     createBarChart = () => {
-    	const {margin, data, color} = this.state.componentProps;
+    	const {margin, data, color, labels, xaxis, yaxis, sort} = this.state.componentProps;
+        
+        if(sort.axis){
+            const keyToSort = this.state.componentProps[sort.axis].columnName;
+            const multiplier = sort.func == "desc" ? -1 : 1;
+            function compare(a, b) {
+              if (a[keyToSort] > b[keyToSort]) return multiplier*1;
+              if (b[keyToSort] > a[keyToSort]) return multiplier*-1;
+
+              return 0;
+            }
+            data.sort(compare);
+        }
     	const width = this.getWidth();
     	const height = this.getHeight();
-		const x = this.createXAxis();
-		const y = this.createYAxis();
+		const x = this.createXAxis(margin, data, xaxis);
+		const y = this.createYAxis(margin, data, yaxis);
     	return (
 			<svg width={width + margin.left + margin.right} height={height + margin.top + margin.bottom}>
 				<g transform= {"translate(" + margin.left + "," + margin.top + ")"}>
 					{this.createBars(data, x, y, height, color)}
+                    {labels.show ? this.createLabels(data, x, y, height, color) : null}
 					<g ref={node => d3.select(node).call(d3.axisBottom(x))} transform= {"translate(0," + height + ")"}>
 					</g>
 					<g ref={node => d3.select(node).call(d3.axisLeft(y))}>

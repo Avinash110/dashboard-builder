@@ -13,6 +13,9 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import SaveIcon from '@material-ui/icons/Save';
 import IconButton from '@material-ui/core/IconButton';
 import Checkbox from '@material-ui/core/Checkbox';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import InputLabel from '@material-ui/core/InputLabel';
 
 import {mergeDeep} from "../Utils.js";
 
@@ -63,6 +66,25 @@ export default class Options extends React.Component {
 		const children = [];
 		settings.forEach((d, i) => {
 			switch (d.type) {
+				case "list":
+					const listItems = d.values.map((item, index) => <MenuItem key={index} value={item.value}>{item.name}</MenuItem>);
+					var value = this.getValue(d.path);
+					children.push(
+					<div style={{display: 'inline-flex'}}>
+						<InputLabel id="demo-simple-select-outlined-label">{d.name}</InputLabel>
+						<Select
+				          labelId="demo-simple-select-outlined-label"
+				          id="demo-simple-select-outlined"
+				          value={value}
+				          onChange={(e)=>this.onChange(e, d, "value")}
+				          label={d.name}
+				        >
+				         {
+				         	listItems
+				         } 
+				        </Select>
+			        </div>);
+					break;
 				case "boolean":
 					var value = this.getValue(d.path);
 					children.push(<ListItem key={d.id}>
